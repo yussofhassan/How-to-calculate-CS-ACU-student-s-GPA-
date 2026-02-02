@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GPA & CGPA Calculator - CS AUC</title>
+<style>
+  /* Base styling */
+  body { 
+    font-family: Arial, sans-serif; 
+    max-width: 800px; 
+    margin: 20px auto; 
+    padding: 0 10px; 
+    box-sizing: border-box;
+  }
+  h1, h2, h3 { text-align: center; }
+  label { display: block; margin-top: 10px; }
+  input, button { 
+    padding: 8px; 
+    margin: 5px 0; 
+    width: 100%; 
+    box-sizing: border-box;
+    font-size: 1rem;
+  }
+  button { cursor: pointer; }
+  .subject { margin-bottom: 15px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+  
+  /* Responsive adjustments */
+  @media(min-width: 600px) {
+    input, button { width: 80%; margin-left: 10%; }
+    .subject input { width: 40%; margin-right: 5%; display: inline-block; }
+    .subject label { display: inline-block; width: 50px; }
+  }
+  @media(min-width: 900px) {
+    body { max-width: 900px; }
+    input, button { width: 60%; margin-left: 20%; }
+  }
+</style>
+</head>
+<body>
+<h1>CS AUC GPA & CGPA Calculator</h1>
+
+<label>Number of subjects this semester:</label>
+<input type="number" id="numSubjects" min="1" value="1">
+<button onclick="generateSubjects()">Generate Fields</button>
+
+<div id="subjectsContainer"></div>
+
+<h3>Previous CGPA Info</h3>
+<label>Last CGPA:</label>
+<input type="number" id="lastCGPA" step="0.01"><br>
+<label>Total credit hours before this semester:</label>
+<input type="number" id="prevCH"><br>
+
+<button onclick="calculateGPA()">Calculate GPA & CGPA</button>
+
+<h2 id="gpaResult"></h2>
+<h2 id="cgpaResult"></h2>
+
+<script>
+function gradeToPoint(grade) {
+    switch(grade.toUpperCase()) {
+        case 'A+': return 4.0;
+        case 'A': return 3.7;
+        case 'A-': return 3.4;
+        case 'B+': return 3.2;
+        case 'B': return 3.0;
+        case 'B-': return 2.8;
+        case 'C+': return 2.6;
+        case 'C': return 2.4;
+        case 'C-': return 2.2;
+        case 'D+': return 2.0;
+        case 'D': return 1.5;
+        case 'D-': return 1.0;
+        case 'F': return 0.0;
+        default: return null;
+    }
+}
+
+function generateSubjects() {
+    var container = document.getElementById('subjectsContainer');
+    container.innerHTML = '';
+    var num = parseInt(document.getElementById('numSubjects').value);
+    for(var i=1; i<=num; i++) {
+        var div = document.createElement('div');
+        div.className = 'subject';
+        div.innerHTML = 
+            '<label>Subject ' + i + ' Grade:</label>' +
+            '<input type="text" class="grade" placeholder="A+, B, C-..." required>' +
+            '<label>Credit Hours:</label>' +
+            '<input type="number" class="ch" value="3" min="1" required>';
+        container.appendChild(div);
+    }
+}
+
+function calculateGPA() {
+    var grades = document.getElementsByClassName('grade');
+    var hours = document.getElementsByClassName('ch');
+    var totalPoints = 0, totalCH = 0;
+
+    for(var i=0; i<grades.length; i++) {
+        var gp = gradeToPoint(grades[i].value);
+        var ch = parseFloat(hours[i].value);
+        if(gp === null) {
+            alert('Invalid grade entered in subject ' + (i+1));
+            return;
+        }
+        totalPoints += gp * ch;
+        totalCH += ch;
+    }
+
+    var gpa = totalPoints / totalCH;
+    document.getElementById('gpaResult').innerText = 'GPA This Semester: ' + gpa.toFixed(2);
+
+    var lastCGPA = parseFloat(document.getElementById('lastCGPA').value);
+    var prevCH = parseFloat(document.getElementById('prevCH').value);
+
+    if(!isNaN(lastCGPA) && !isNaN(prevCH)) {
+        var totalPointsAll = lastCGPA * prevCH + totalPoints;
+        var totalCHAll = prevCH + totalCH;
+        var newCGPA = totalPointsAll / totalCHAll;
+        document.getElementById('cgpaResult').innerText = 'New CGPA: ' + newCGPA.toFixed(2);
+    }
+}
+</script>
+</body>
+</html>
